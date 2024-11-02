@@ -5,6 +5,9 @@ on:
     tags:
       - '*'
 
+permissions:
+  contents: write
+
 jobs:
   release:
     name: Create Release
@@ -20,15 +23,6 @@ jobs:
       - name: Run tests
         run: swift test
       
-      - name: Build documentation
-        run: |
-          swift package --allow-writing-to-directory ./docs \
-            generate-documentation --target XCBuildKit \
-            --disable-indexing \
-            --transform-for-static-hosting \
-            --hosting-base-path XCBuildKit \
-            --output-path ./docs
-      
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
@@ -36,5 +30,4 @@ jobs:
           draft: false
           prerelease: false
           generate_release_notes: true
-          files: |
-            ./docs/**/*
+`

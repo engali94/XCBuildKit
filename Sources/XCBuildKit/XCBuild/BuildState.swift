@@ -39,10 +39,10 @@ public enum BuildState: Equatable, Sendable {
     ///
     /// - Parameter String: A description of the current build phase or activity.
     case inProgress(String)
-    
+
     /// Indicates that the build has completed successfully.
     case completed
-    
+
     /// Indicates that the build failed with an error.
     ///
     /// - Parameter String: A description of what went wrong during the build.

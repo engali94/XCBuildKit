@@ -9,7 +9,7 @@ import Foundation
 
 actor TaskController {
     private var task: Task<Void, Error>?
-    
+
     func start(_ block: @escaping @Sendable () async throws -> Void) {
         task = Task {
             do {
@@ -19,7 +19,7 @@ actor TaskController {
             }
         }
     }
-    
+
     func cancel() {
         task?.cancel()
     }
@@ -48,22 +48,22 @@ actor TaskController {
 /// }
 /// ```
 public final class XcodeBuild: Sendable, XcodeBuilding {
-    
+
     // MARK: - Types
     /// Errors that can occur during the build process.
     public enum XcodeBuildError: LocalizedError {
         /// The build configuration is invalid.
         case invalidConfiguration(String)
-        
+
         /// The build failed with an error.
         case buildFailed(String)
-        
+
         /// The build task was cancelled.
         case taskCancelled
-        
+
         /// A dependency-related error occurred.
         case dependencyError(String)
-        
+
         /// A localized description of the error.
         public var errorDescription: String? {
             switch self {
@@ -78,7 +78,7 @@ public final class XcodeBuild: Sendable, XcodeBuilding {
             }
         }
     }
-    
+
     private enum BuildOutputIndicator {
         static let error = "❌"
         static let warning = "⚠️"
@@ -88,7 +88,7 @@ public final class XcodeBuild: Sendable, XcodeBuilding {
         static let testSuite = "Test Suite"
         static let testCase = "Test Case"
     }
-    
+
     // MARK: - Properties
     private let shellCommand: ShellCommandExecuting
     private let logsPath: URL
@@ -112,35 +112,35 @@ public final class XcodeBuild: Sendable, XcodeBuilding {
         self.logsPath = logsPath
         self.logFormatter = logFormatter
     }
-    
+
     // MARK: - XcodeBuilding
     public func execute(_ action: XcodeBuildAction, options: XcodeBuildOptions) -> AsyncStream<BuildState> {
         AsyncStream { continuation in
             let taskController = TaskController()
-            
+
             Task {
                 await taskController.start {
                     do {
                         try self.setupLogsDirectory()
                         let rawLogPath = try self.createLogFile(for: action)
                         let arguments = try self.validateAndGetArguments(action, options)
-                        
+
                         let output = self.shellCommand.execute(
                             arguments: ["/bin/bash", "-c", self.buildCommand(arguments: arguments, logPath: rawLogPath)],
                             environment: ProcessInfo.processInfo.environment,
                             workingDirectory: options.workingDirectory
                         )
-                        
+
                         try await self.processOutput(output, continuation: continuation)
                         continuation.yield(.completed)
-                        
+
                     } catch {
                         self.handleError(error, continuation: continuation)
                     }
                     continuation.finish()
                 }
             }
-            
+
             continuation.onTermination = { @Sendable _ in
                 Task {
                     await taskController.cancel()
@@ -148,7 +148,7 @@ public final class XcodeBuild: Sendable, XcodeBuilding {
             }
         }
     }
-    
+
     // MARK: - Private Methods
     private func setupLogsDirectory() throws {
         try FileManager.default.createDirectory(
@@ -157,13 +157,13 @@ public final class XcodeBuild: Sendable, XcodeBuilding {
             attributes: nil
         )
     }
-    
+
     private func createLogFile(for action: XcodeBuildAction) throws -> URL {
         let timestamp = ISO8601DateFormatter().string(from: Date())
         let logFileName = "xcodebuild_\(action.command)_\(timestamp).log"
         return logsPath.appendingPathComponent(logFileName)
     }
-    
+
     private func buildCommand(arguments: [String], logPath: URL) -> String {
         let command = """
         set -o pipefail && \
@@ -174,12 +174,12 @@ public final class XcodeBuild: Sendable, XcodeBuilding {
         print("Executing command: \(command)")
         return command
     }
-    
+
     private func validateAndGetArguments(_ action: XcodeBuildAction, _ options: XcodeBuildOptions) throws -> [String] {
         try validator.validate(action, options)
         return options.asArguments(for: action)
     }
-    
+
     private func processOutput(
         _ output: AsyncThrowingStream<ShellOutput, Error>,
         continuation: AsyncStream<BuildState>.Continuation
@@ -190,7 +190,7 @@ public final class XcodeBuild: Sendable, XcodeBuilding {
                 if let line = String(data: data, encoding: .utf8) {
                     let lines = line.components(separatedBy: .newlines)
                     for line in lines where !line.isEmpty {
-                        
+
                         // Don't treat simulator warnings as build failures
                         if line.contains("WARNING: Using the first of multiple matching destinations") {
                             continuation.yield(.inProgress(line))
@@ -211,7 +211,7 @@ public final class XcodeBuild: Sendable, XcodeBuilding {
             }
         }
     }
-    
+
     private func handleError(_ error: Error, continuation: AsyncStream<BuildState>.Continuation) {
         if error is CancellationError {
             continuation.yield(.error(XcodeBuildError.taskCancelled.localizedDescription))
@@ -222,17 +222,17 @@ public final class XcodeBuild: Sendable, XcodeBuilding {
         }
         // don't yield .completed after an error
     }
-    
+
     private func processOutputLine(_ line: String) -> BuildState {
         guard !line.isEmpty else { return .inProgress(line) }
-        
+
         let trimmedLine = line.trimmingCharacters(in: .whitespaces)
-        
+
         // Check if it's just a simulator destination warning
         if trimmedLine.contains("WARNING: Using the first of multiple matching destinations") {
             return .inProgress(logFormatter.formatWarning(trimmedLine))
         }
-        
+
         switch true {
         case line.contains(BuildOutputIndicator.error):
             // Make sure it's an actual error, not just a warning

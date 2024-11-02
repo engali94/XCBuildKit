@@ -34,36 +34,36 @@ public enum Destination: Sendable {
     case watchOSSimulator(device: String? = nil)
     /// Physical watchOS device destination with optional device name.
     case watchOSDevice(device: String? = nil)
-    
+
     /// The xcodebuild-compatible string representation of the destination.
     var value: String {
         switch self {
         case .iOSSimulator(let device):
             let base = "platform=iOS Simulator"
             return device.map { "\(base),name=\($0)" } ?? base
-            
+
         case .iOSDevice(let device):
             let base = "platform=iOS"
             return device.map { "\(base),name=\($0)" } ?? base
-            
+
         case .macOS:
             return "platform=macOS"
-            
+
         case .macCatalyst:
             return "platform=macOS,variant=Mac Catalyst"
-            
+
         case .tvOSSimulator(let device):
             let base = "platform=tvOS Simulator"
             return device.map { "\(base),name=\($0)" } ?? base
-            
+
         case .tvOSDevice(let device):
             let base = "platform=tvOS"
             return device.map { "\(base),name=\($0)" } ?? base
-            
+
         case .watchOSSimulator(let device):
             let base = "platform=watchOS Simulator"
             return device.map { "\(base),name=\($0)" } ?? base
-            
+
         case .watchOSDevice(let device):
             let base = "platform=watchOS"
             return device.map { "\(base),name=\($0)" } ?? base
@@ -91,7 +91,7 @@ public enum SDK: String, Sendable {
     case watchOS = "watchos"
     /// watchOS simulator SDK
     case watchSimulator = "watchsimulator"
-    
+
     /// The xcodebuild-compatible string representation of the SDK.
     var value: String { rawValue }
 }
@@ -102,7 +102,7 @@ public enum SDK: String, Sendable {
 public struct ArchivePath: Sendable {
     /// The validated archive path.
     let path: String
-    
+
     /// Creates a new archive path.
     ///
     /// - Parameter path: The path to the archive.
@@ -125,7 +125,7 @@ public struct ExportOptions: Sendable {
     let exportPath: String
     /// The path to the export options plist file.
     let optionsPlist: String
-    
+
     /// Creates new export options.
     ///
     /// - Parameters:
@@ -143,7 +143,7 @@ public struct ExportOptions: Sendable {
         guard !optionsPlist.isEmpty else {
             throw AnyError("Export options plist cannot be empty")
         }
-        
+
         self.archivePath = archivePath
         self.exportPath = exportPath
         self.optionsPlist = optionsPlist
@@ -186,13 +186,13 @@ public struct XcodeBuildOptions: Sendable {
     public let configuration: String?
     /// The directory where the build command should be executed.
     public let workingDirectory: String?
-    
+
     // MARK: - Build Configuration
     public let sdk: SDK?
     public let destination: Destination?
     public let derivedDataPath: String?
     public let xcconfig: String?
-    
+
     // MARK: - Test Configuration
     public let testPlan: String?
     public let testConfiguration: String?
@@ -201,11 +201,11 @@ public struct XcodeBuildOptions: Sendable {
     public let skipTesting: [String]
     public let onlyTesting: [String]
     public let testTargets: [String]
-    
+
     // MARK: - Archive Configuration
     public let archivePath: ArchivePath?
     public let exportOptions: ExportOptions?
-    
+
     // MARK: - Build Settings
     public let enableCodeCoverage: Bool
     public let enableThreadSanitizer: Bool
@@ -217,11 +217,10 @@ public struct XcodeBuildOptions: Sendable {
     public let jobs: Int?
     public let hideShellScript: Bool
     public let allowProvisioningUpdates: Bool
-    
+
     // MARK: - Additional Settings
     public let extraArguments: [String]
-    
-    
+
     /// Creates a new build configuration with the specified options.
     ///
     /// - Parameters:
@@ -315,7 +314,7 @@ public struct XcodeBuildOptions: Sendable {
         self.allowProvisioningUpdates = allowProvisioningUpdates
         self.extraArguments = extraArguments
     }
-    
+
     // MARK: - Command Line Arguments
     /// Converts the build options into command-line arguments for xcodebuild.
     ///
@@ -323,26 +322,26 @@ public struct XcodeBuildOptions: Sendable {
     /// - Returns: An array of command-line arguments.
     public func asArguments(for action: XcodeBuildAction) -> [String] {
         var args: [String] = []
-        
+
         // Project configuration
         args.append("-project \(project).xcodeproj")
         scheme.map { args.append("-scheme \($0)") }
         target.map { args.append("-target \($0)") }
         configuration.map { args.append("-configuration \($0)") }
-        
+
         // Build settings
         sdk.map { args.append("-sdk \($0.value)") }
         destination.map { args.append("-destination '\($0.value)'") }
         derivedDataPath.map { args.append("-derivedDataPath \($0)") }
         xcconfig.map { args.append("-xcconfig \($0)") }
-        
+
         // Test configuration
         if case .test = action {
             testPlan.map { args.append("-testPlan \($0)") }
             testConfiguration.map { args.append("-testConfiguration \($0)") }
             testLanguage.map { args.append("-testLanguage \($0)") }
             testRegion.map { args.append("-testRegion \($0)") }
-            
+
             if !skipTesting.isEmpty {
                 args.append("-skip-testing:\(skipTesting.joined(separator: ","))")
             }
@@ -355,7 +354,7 @@ public struct XcodeBuildOptions: Sendable {
                 args.append("-only-testing:\(testTargets.joined(separator: ","))")
             }
         }
-        
+
         // Archive configuration
         if case .archive = action {
             archivePath.map { args.append("-archivePath \($0.path)") }
@@ -367,7 +366,7 @@ public struct XcodeBuildOptions: Sendable {
                 args.append("-allowProvisioningUpdates")
             }
         }
-        
+
         // Build flags
         if enableCodeCoverage { args.append("-enableCodeCoverage YES") }
         if enableThreadSanitizer { args.append("-enableThreadSanitizer YES") }
@@ -378,11 +377,11 @@ public struct XcodeBuildOptions: Sendable {
         maximumActions.map { args.append("-maximum-concurrent-actions \($0)") }
         jobs.map { args.append("-jobs \($0)") }
         if hideShellScript { args.append("-hideShellScriptEnvironment") }
-        
+
         args.append(contentsOf: extraArguments)
-        
+
         args.append(action.command)
-        
+
         return args
     }
 

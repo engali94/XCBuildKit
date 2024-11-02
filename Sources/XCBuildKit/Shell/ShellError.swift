@@ -39,24 +39,24 @@ import Foundation
 public enum ShellError: LocalizedError {
     /// The command to execute was not provided or was empty.
     case missingExecutable
-    
+
     /// The specified executable could not be found in the system PATH.
     ///
     /// - Parameter name: The name of the executable that couldn't be found.
     case executableNotFound(String)
-    
+
     /// The command completed but returned a non-zero exit code.
     ///
     /// - Parameters:
     ///   - code: The exit code returned by the process.
     ///   - stderr: The error output captured from the process.
     case nonZeroExit(code: Int32, stderr: String)
-    
+
     /// The process was terminated by a signal.
     ///
     /// - Parameter signal: The signal number that terminated the process.
     case terminated(signal: Int32)
-    
+
     /// A localized description of the error suitable for user presentation.
     ///
     /// This property provides human-readable error messages for each error case.
@@ -72,7 +72,7 @@ public enum ShellError: LocalizedError {
             return "Process terminated with signal \(signal)"
         }
     }
-    
+
     /// Indicates whether the error represents a process termination.
     ///
     /// Use this property to determine if the error was caused by process termination,

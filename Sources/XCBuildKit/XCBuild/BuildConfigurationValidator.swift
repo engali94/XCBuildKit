@@ -41,7 +41,7 @@ public protocol BuildConfigurationValidating: Sendable {
 public struct BuildConfigurationValidator: BuildConfigurationValidating {
     /// Creates a new instance of the build configuration validator.
     public init() {}
-    
+
     /// Validates build configuration based on the specified action.
     ///
     /// - Parameters:
@@ -61,7 +61,7 @@ public struct BuildConfigurationValidator: BuildConfigurationValidating {
             break
         }
     }
-    
+
     /// Validates configuration required for testing actions.
     ///
     /// - Parameter options: The build options to validate.
@@ -71,7 +71,7 @@ public struct BuildConfigurationValidator: BuildConfigurationValidating {
         try validateRequiredField(options.project, "Project")
         try validateRequiredField(options.scheme, "Scheme")
     }
-    
+
     /// Validates configuration required for archive actions.
     ///
     /// - Parameter options: The build options to validate.
@@ -81,7 +81,7 @@ public struct BuildConfigurationValidator: BuildConfigurationValidating {
         try validateRequiredField(options.project, "Project")
         try validateRequiredField(options.scheme, "Scheme")
     }
-    
+
     /// Validates configuration required for export actions.
     ///
     /// - Parameter options: The build options to validate.
@@ -90,12 +90,12 @@ public struct BuildConfigurationValidator: BuildConfigurationValidating {
         guard let exportOptions = options.exportOptions else {
             throw AnyError("Export options are required for export")
         }
-        
+
         try validateRequiredField(exportOptions.archivePath, "Archive path")
         try validateRequiredField(exportOptions.exportPath, "Export path")
         try validateRequiredField(exportOptions.optionsPlist, "Export options plist")
     }
-    
+
     /// Validates a required field and throws an error if it is missing or empty.
     ///
     /// - Parameters:
@@ -112,11 +112,11 @@ public struct BuildConfigurationValidator: BuildConfigurationValidating {
 
 struct AnyError: Swift.Error, LocalizedError {
     let message: String
-    
+
     init (_ message: String) {
         self.message = message
     }
-    
+
     var errorDescription: String? {
         message
     }

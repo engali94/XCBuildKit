@@ -35,12 +35,12 @@ public enum ShellOutput: Sendable {
     ///
     /// - Parameter data: The raw output data from the command's stdout stream.
     case stdout(Data)
-    
+
     /// Standard error data from the command.
     ///
     /// - Parameter data: The raw output data from the command's stderr stream.
     case stderr(Data)
-    
+
     /// Indicates whether the output represents an error message.
     ///
     /// Use this property to quickly determine if the output came from
@@ -53,7 +53,7 @@ public enum ShellOutput: Sendable {
         case .stdout: false
         }
     }
-    
+
     /// Converts the output data to a string using the specified encoding.
     ///
     /// This method attempts to convert the raw output data into a string

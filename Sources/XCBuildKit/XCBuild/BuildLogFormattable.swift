@@ -71,53 +71,53 @@ public protocol BuildLogFormattable: Sendable {
 /// ## Example Usage
 /// ```swift
 /// let formatter = BuildLogFormatter()
-/// 
+///
 /// // Format an error message
 /// let error = formatter.formatError("❌ Compilation failed")
-/// 
+///
 /// // Format a warning message
 /// let warning = formatter.formatWarning("⚠️ Deprecated API usage")
-/// 
+///
 /// // Format a success message
 /// let success = formatter.formatSuccess("✓ Build succeeded")
 /// ```
 public struct BuildLogFormatter: BuildLogFormattable {
     /// Creates a new instance of the build log formatter.
     public init() {}
-    
+
     /// Formats error messages by removing the error emoji and adding an "Error:" prefix.
     public func formatError(_ line: String) -> String {
         "Error: " + line.replacingOccurrences(of: "❌ ", with: "")
     }
-    
+
     /// Formats warning messages by removing the warning emoji and adding a "Warning:" prefix.
     public func formatWarning(_ line: String) -> String {
         "Warning: " + line.replacingOccurrences(of: "⚠️ ", with: "")
     }
-    
+
     /// Formats build phase headers by removing the "===" delimiters and extra whitespace.
     public func formatBuildPhase(_ line: String) -> String {
         line.replacingOccurrences(of: "===", with: "")
             .trimmingCharacters(in: .whitespaces)
     }
-    
+
     /// Passes through test output without modification.
     public func formatTestOutput(_ line: String) -> String {
         line
     }
-    
+
     /// Formats progress messages by removing the progress indicator and extra whitespace.
     public func formatProgress(_ line: String) -> String {
         line.replacingOccurrences(of: "▸", with: "")
             .trimmingCharacters(in: .whitespaces)
     }
-    
+
     /// Formats success messages by removing the checkmark and adding a "Completed:" prefix.
     public func formatSuccess(_ line: String) -> String {
         "Completed: " + line.replacingOccurrences(of: "✓", with: "")
             .trimmingCharacters(in: .whitespaces)
     }
-    
+
     /// Passes through generic messages without modification.
     public func formatGeneric(_ line: String) -> String {
         line

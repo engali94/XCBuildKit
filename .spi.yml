@@ -1,0 +1,6 @@
+version: 1
+builder:
+  configs:
+    - platform: macos
+      scheme: XCBuildKit
+  documentation_targets: [XCBuildKit]

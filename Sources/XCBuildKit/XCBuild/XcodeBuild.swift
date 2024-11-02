@@ -124,9 +124,9 @@ public final class XcodeBuild: Sendable, XcodeBuilding {
                         try self.setupLogsDirectory()
                         let rawLogPath = try self.createLogFile(for: action)
                         let arguments = try self.validateAndGetArguments(action, options)
-
+                        let command = self.buildCommand(arguments: arguments, logPath: rawLogPath)
                         let output = self.shellCommand.execute(
-                            arguments: ["/bin/bash", "-c", self.buildCommand(arguments: arguments, logPath: rawLogPath)],
+                            arguments: ["/bin/bash", "-c", command],
                             environment: ProcessInfo.processInfo.environment,
                             workingDirectory: options.workingDirectory
                         )
@@ -166,12 +166,14 @@ public final class XcodeBuild: Sendable, XcodeBuilding {
 
     private func buildCommand(arguments: [String], logPath: URL) -> String {
         let command = """
-        set -o pipefail && \
+        NSUnbufferedIO=YES set -o pipefail && \
         xcodebuild \(arguments.joined(separator: " ")) \
         | tee '\(logPath.path)' \
-        | xcbeautify
+        | xcbeautify --renderer github-actions
         """
+#if DEBUG
         print("Executing command: \(command)")
+#endif
         return command
     }
 

@@ -43,4 +43,19 @@ public protocol ShellCommandExecuting: Sendable {
         environment: [String: String],
         workingDirectory: String?
     ) -> AsyncThrowingStream<ShellOutput, Error>
+    
+}
+
+public extension ShellCommandExecuting {
+    func execute(
+        _ arguments: String...,
+        environment: [String: String]? = nil,
+        at workingDirectory: String? = nil
+    ) -> AsyncThrowingStream<ShellOutput, Error> {
+        ShellCommandExecuter().execute(
+            arguments: arguments,
+            environment: environment ?? ProcessInfo.processInfo.environment,
+            workingDirectory: workingDirectory
+        )
+    }
 }
